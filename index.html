@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>The Dark Sky Forecast API</title>
+  <link rel="shortcut icon" href="http://forecast.io/favicon.ico">
+    <link href="css/bootstrap.min.css?1374088915" media="screen" rel="stylesheet" type="text/css" />
+  <link href="css/darkskydev.css?1374266824" media="screen" rel="stylesheet" type="text/css" />
+  <link href="css/morris.css?1393444354" media="screen" rel="stylesheet" type="text/css" />
+  <meta name="csrf-param" content="authenticity_token"/>
+<meta name="csrf-token" content="AoEBFt&#47;R06qwIOih4Ke&#47;OySERsKnfNUzDTynooZB7D8="/>
+</head>
+<body>
+
+  <div class="container">
+    <div class="row">
+      <div class="navbar navbar-inverse span10">
+        <!-- This is a sloppy hack. :( -->
+        <div class="navbar-inner" style="padding-left: 40px; background-image: url(/img/dark_sky_header_logo.png); background-repeat: no-repeat; background-position: 8px 4px;">
+          <div class="container">
+            <a class="brand" href="/">The Dark Sky Forecast API</a>
+            <ul class="nav pull-right">
+              <li><a href="/docs/v2">API Docs</a></li>
+              <li class="divider-vertical"></li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Account <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li><a href="/edit_profile"><i class="icon-user"></i><i class="icon-user icon-white"></i> My Profile</a></li>
+                  <li><a href="/edit_billing"><i class="icon-cog"></i><i class="icon-cog icon-white"></i> Billing Info</a></li>
+                  <li class="divider"></li>
+                  <li><a href="/log_out"><i class="icon-off"></i><i class="icon-off icon-white"></i> Log out</a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class="row">
+  <div class="span10">
+    <div id="billing_alert" class="alert alert-error">
+      <h4><a href="/edit_billing">Enter billing information</a> to ensure your access isn’t cut off after 1,000 calls per day!</h4>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="span10">
+    <div id="intro_alert" class="alert alert-info">
+      <a class="close" data-dismiss="alert" href="#">×</a>
+      <h4 class="alert-heading">Welcome to your developer dashboard…</h4>
+      <p>This page allows you to track your usage of the Forecast API. At the bottom of the page is your API Key which should replace “<code>APIKEY</code>” anywhere it appears in the <a href="/docs/v2">documentation</a>. For example…</p>
+      <code><a class="api_test_link" href="https://api.forecast.io/forecast/17b2efb79f2c5dc2a5325dff4d7e7551/37.8267,-122.423" target="_blank">https://api.forecast.io/forecast/17b2efb79f2c5dc2a5325dff4d7e7551/37.8267,-122.423</a></code>
+      <p>…will get you the forecast for Alcatraz (in case you need to use hyper-local weather predictions to aid in an escape). If anyone ever gets a hold of your API Key you should reset it immediately.</p>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="span10">
+    <div id="api_use"class="well">
+
+      <div class="date_controls visible-desktop btn-group" data-toggle="buttons-radio">
+        <button data-range-str="last_7_days" type="button" class="last_7_days btn btn-small">Last 7 days</button>
+        <button data-range-str="month_to_date" type="button" class="month_to_date btn btn-small">Month-to-date</button>
+        <button data-range-str="last_month" type="button" class="last_month btn btn-small active">Last month</button>
+        <button data-range-str="last_2_months" type="button" class="last_2_months btn btn-small">Last 2 months</button>
+        <button data-range-str="last_3_months" type="button" class="last_3_months btn btn-small">Last 3 months</button>
+        <!-- <button data-range-str="last_6_months" type="button" class="last_6_months btn btn-small">Last 6 months</button> -->
+        <button data-range-str="all_time" type="button" class="all_time btn btn-small">All-time</button>
+      </div>
+
+      <div class="date_controls hidden-desktop visible-phone btn-group" data-toggle="buttons-radio">
+        <button data-range-str="last_7_days" type="button" class="last_7_days btn btn-mini">Last 7 days</button>
+        <button data-range-str="month_to_date" type="button" class="month_to_date btn btn-mini">Month-to-date</button>
+        <button data-range-str="last_month" type="button" class="last_month btn btn-mini active">Last month</button>
+        <button data-range-str="last_2_months" type="button" class="last_2_months btn btn-mini">Last 2 months</button>
+        <!-- <button data-range-str="last_3_months" type="button" class="last_3_months btn btn-mini">Last 3 months</button> -->
+        <!-- <button data-range-str="last_6_months" type="button" class="last_6_months btn btn-mini">Last 6 months</button> -->
+        <button data-range-str="all_time" type="button" class="all_time btn btn-mini">All-time</button>
+      </div>
+
+      <div id="graph"></div>
+
+      <small id="tz_note">All times <abbr title="Coordinated Universal Time" class="initialism">UTC</abbr></small>
+
+      <div id="stats">
+        <ul id="today_stats">
+          <li><strong id="calls_today">0</strong> <span id="calls_today_text">Calls today</span></li>
+          <li><strong id="cost_today">$0</strong> today</li>
+        </ul>
+
+        <ul id="range_stats">
+          <li><strong id="calls_in_range">0</strong> Calls in range</li>
+          <li><strong id="cost_range">$0</strong> for range</li>
+        </ul>
+
+        <ul id="months_stats">
+          <li><strong id="calls_this_month">0</strong> Calls this month</li>
+          <li><strong id="cost_month">$0</strong> this month</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="span10" id="api_keys">
+    <div class="well">
+      <h2>API Key</h2>
+        <span class="input-append">
+          <input id="api_key" type="text" value="17b2efb79f2c5dc2a5325dff4d7e7551" readonly="readonly" onmouseup="this.select()" /><button id="api_key_reset_button" class="btn btn-danger btn-small"><i class="icon-refresh icon-white"></i> Reset API Key</button>
+        </span>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+</div>
+
+
+    <div class="row">
+  <div class="span10">
+    <footer>
+      <small id="copyright">©2012&ndash;6 The Dark Sky Company, LLC</small>
+      <nav>
+        <a href="mailto:developer@forecast.io" title="Just send us an email, it’s that easy">Email Us</a>
+        <a href="/terms_of_use.txt" title="The Forecast API’s Terms of Use">Terms of Use</a>
+        <a href="/privacy_policy.txt" title="The Forecast API’s Privacy Policy">Privacy Policy</a>
+      </nav>
+    </footer>
+  </div>
+</div>
+
+
+  </div>
+
+    <script>
+      var DarkSkyDev = {}
+      DarkSkyDev.free_daily_calls = 1000
+      DarkSkyDev.calls_per_dollar = 10000
+    </script>
+
+  <script src="https://js.stripe.com/v1/" type="text/javascript"></script>
+<script src="js/jquery-1.8.2.min.js?1374088915" type="text/javascript"></script>
+<script src="js/bootstrap.min.js?1374088915" type="text/javascript"></script>
+<script src="js/moment.min.js?1374088915" type="text/javascript"></script>
+<script src="js/moment-range.js?1374088915" type="text/javascript"></script>
+<script src="js/raphael-min.js?1374088915" type="text/javascript"></script>
+<script src="js/morris-0.5.1.min.js?1424109879" type="text/javascript"></script>
+<script src="js/darkskydev.js?1424109879" type="text/javascript"></script>
+
+  <script>
+    Stripe.publishableKey = 'pk_YiC5DwMEthqxbx1FskWRXOuAwakne'
+    var _gaq=[["_setAccount","UA-27611241-4"],["_trackPageview"]];
+    (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;
+    g.src=("https:"==location.protocol?"//ssl":"//www")+".google-analytics.com/ga.js";
+    s.parentNode.insertBefore(g,s)}(document,"script"));
+    var _gauges = _gauges || [];
+    (function() {
+      var t   = document.createElement('script');
+      t.type  = 'text/javascript';
+      t.async = true;
+      t.id    = 'gauges-tracker';
+      t.setAttribute('data-site-id', '515bb0cb108d7b6151000117');
+      t.src = '//secure.gaug.es/track.js';
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(t, s);
+    })();
+  </script>
+
+</body>
+</html>
