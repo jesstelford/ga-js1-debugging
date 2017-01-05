@@ -42,7 +42,7 @@ Then visit `http://localhost:8080`, and you will see the forecast.io developer
 page.
 
 As you make changes to your code, you will have to stop this command with
-<Ctrl-C>, then re-run `npm run start`.
+`Ctrl-C`, then re-run `npm run start`.
 
 ## Debugging
 
